@@ -1,0 +1,57 @@
+const request = window.indexedDB.open('meuBancoDeDados', 1); // Nome e versão do banco de dados
+
+request.onerror = function(event) {
+  console.error('Erro ao abrir o banco de dados:', event.target.errorCode);
+};
+
+request.onsuccess = function(event) {
+  const db = event.target.result;
+  console.log('Banco de dados aberto com sucesso!');
+  // Aqui você pode começar a realizar operações no banco de dados
+};
+
+request.onupgradeneeded = function(event) {
+  const db = event.target.result;
+  const objectStore = db.createObjectStore('minhaLojaDeObjetos', { keyPath: 'id' }); // Cria uma loja de objetos
+
+  objectStore.createIndex('nome', 'nome', { unique: false }); // Cria um índice na propriedade 'nome'
+
+  console.log('Banco de dados atualizado para a versão 1.');
+};
+function adicionarDado(db, dado) {
+    const transaction = db.transaction(['minhaLojaDeObjetos'], 'readwrite');
+    const objectStore = transaction.objectStore('minhaLojaDeObjetos');
+    const request = objectStore.add(dado);
+  
+    request.onsuccess = function() {
+      console.log('Dado adicionado com sucesso!');
+    };
+  
+    request.onerror = function() {
+      console.error('Erro ao adicionar dado:', request.error);
+    };
+  }
+  
+  // Exemplo de uso:
+  const novoDado = { id: 1, nome: 'Exemplo', valor: 100 };
+  adicionarDado(db, novoDado); // db é o banco de dados aberto no passo 1
+  function obterDado(db, id) {
+    const transaction = db.transaction(['minhaLojaDeObjetos'], 'readonly');
+    const objectStore = transaction.objectStore('minhaLojaDeObjetos');
+    const request = objectStore.get(id);
+  
+    request.onsuccess = function() {
+      if (request.result) {
+        console.log('Dado encontrado:', request.result);
+      } else {
+        console.log('Dado não encontrado.');
+      }
+    };
+  
+    request.onerror = function() {
+      console.error('Erro ao obter dado:', request.error);
+    };
+  }
+  
+  // Exemplo de uso:
+  obterDado(db, 1); // db é o banco de dados aberto no passo 1
